@@ -1,0 +1,7 @@
+{
+  "name": "Gemini Neural Swarm UI",
+  "description": "A feature-rich web-based chat interface for the Gemini API, inspired by advanced CLI tooling. It supports streaming, configuration of model parameters, JSON mode with schemas, Google Search grounding, and full conversation management.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

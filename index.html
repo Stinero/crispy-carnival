@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gemini Neural Swarm UI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#0A0A1A">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+              display: ['Orbitron', 'sans-serif'],
+            },
+            colors: {
+              'space-blue': {
+                900: '#0A0A1A',
+                800: '#1A1A2A',
+                700: '#2A2A3A',
+              },
+              'accent-cyan': '#00FFFF',
+              'accent-magenta': '#FF00FF',
+              'accent-lime': '#39FF14',
+              gray: {
+                50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0',
+                300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b',
+                600: '#475569', 700: '#334155', 800: '#1e293b',
+                900: '#0f172a', 950: '#020617',
+              },
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out forwards',
+              'slide-in-up': 'slideInUp 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+              'glow': 'glow 2s ease-in-out infinite',
+              'pulse-fast': 'pulseFast 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'pan-grid': 'pan-grid 20s linear infinite',
+            },
+            keyframes: {
+              fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
+              slideInUp: { '0%': { opacity: 0, transform: 'translateY(20px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
+              glow: {
+                '0%, 100%': { opacity: 0.7 },
+                '50%': { opacity: 1 },
+              },
+               pulseFast: {
+                '0%, 100%': { transform: 'scale(1)', opacity: 1 },
+                '50%': { transform: 'scale(1.1)', opacity: 0.7 },
+              },
+              'pan-grid': {
+                '0%': { background-position: '0% 0%' },
+                '100%': { background-position: '-40px -40px' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/": "https://esm.sh/react@18.3.1/",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "@google/genai": "https://esm.sh/@google/genai@^1.13.0",
+    "@google/genai/": "https://esm.sh/@google/genai@^1.13.0/",
+    "marked": "https://esm.sh/marked@^14.0.0",
+    "p5": "https://esm.sh/p5@1.9.4",
+    "mermaid": "https://esm.sh/mermaid@^10.9.1",
+    "react-dom/": "https://esm.sh/react-dom@18.3.1/",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "@e2b/sdk": "https://esm.sh/@e2b/sdk@^1.1.0",
+    "chart.js": "https://esm.sh/chart.js@^4.4.3",
+    "chart.js/auto": "https://esm.sh/chart.js@^4.4.3/auto",
+    "chartjs-adapter-date-fns": "https://esm.sh/chartjs-adapter-date-fns@^3.0.0",
+    "chart.js/": "https://esm.sh/chart.js@^4.5.0/",
+    "path": "https://esm.sh/path@^0.12.7",
+    "fs": "https://esm.sh/fs@^0.0.1-security",
+    "child_process": "https://esm.sh/child_process@^1.0.2",
+    "express": "https://esm.sh/express@^5.1.0",
+    "cors": "https://esm.sh/cors@^2.8.5",
+    "sql.js": "https://esm.sh/sql.js@^1.13.0",
+    "body-parser": "https://esm.sh/body-parser@^2.2.0"
+  }
+}
+</script>
+<style>
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #0A0A1A;
+  }
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .font-display {
+    font-family: 'Orbitron', 'sans-serif';
+  }
+  /* Custom scrollbar for a futuristic look */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0A0A1A;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-cyan, #00FFFF);
+    box-shadow: 0 0 10px var(--accent-cyan, #00FFFF);
+  }
+  
+  /* Custom prose styles for rendered markdown */
+  .prose-custom-styles {
+    @apply prose-sm prose-slate dark:prose-invert max-w-none break-words;
+    --tw-prose-body: #EAEAEA;
+    --tw-prose-headings: white;
+    --tw-prose-links: #00FFFF;
+    --tw-prose-bold: white;
+    --tw-prose-code: #FF00FF;
+    --tw-prose-bullets: #00FFFF;
+    --tw-prose-hr: #334155;
+    --tw-prose-quotes: #cbd5e1;
+    --tw-prose-quote-borders: #475569;
+  }
+  .prose-custom-styles p { @apply my-2; }
+  .prose-custom-styles ul, .prose-custom-styles ol { @apply my-2 pl-5; }
+  .prose-custom-styles code { @apply font-mono text-sm !font-normal bg-space-blue-800/70 rounded py-0.5 px-1.5 before:content-[''] after:content-['']; }
+  .prose-custom-styles pre code.hljs { @apply !bg-transparent p-0; }
+  .prose-custom-styles pre .hljs { @apply !bg-space-blue-800/90 !text-gray-300; }
+  .prose-custom-styles blockquote { @apply border-l-2 pl-4 italic my-3; }
+  .prose-custom-styles pre { @apply my-4 !bg-space-blue-800/90 rounded-md border border-space-blue-700; }
+  .prose-custom-styles table { @apply my-4 w-full border-collapse text-xs shadow-md rounded-md; }
+  .prose-custom-styles thead { @apply border-b border-space-blue-700; }
+  .prose-custom-styles th { @apply bg-space-blue-800 p-3 text-left font-semibold border border-space-blue-700; }
+  .prose-custom-styles td { @apply p-3 border border-space-blue-700; }
+  .prose-custom-styles tbody tr:nth-child(even) { @apply bg-space-blue-800/40; }
+
+  /* GFM Task List styling */
+  .prose-custom-styles ul.task-list { @apply list-none p-0; }
+  .prose-custom-styles .task-list-item { @apply flex items-start my-1; }
+  .prose-custom-styles .task-list-item input[type="checkbox"] {
+    @apply h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-accent-cyan bg-gray-100 dark:bg-gray-800 focus:ring-accent-cyan mr-3 mt-1 flex-shrink-0;
+  }
+
+  /* highlight.js theme overrides */
+  .hljs-comment, .hljs-quote { @apply !text-gray-500 italic; }
+  .hljs-variable, .hljs-template-variable, .hljs-tag, .hljs-name, .hljs-selector-id, .hljs-selector-class, .hljs-regexp, .hljs-deletion { @apply !text-accent-magenta; }
+  .hljs-number, .hljs-built_in, .hljs-builtin-name, .hljs-literal, .hljs-type, .hljs-params, .hljs-meta, .hljs-link { @apply !text-yellow-400; }
+  .hljs-attribute { @apply !text-accent-cyan; }
+  .hljs-string, .hljs-symbol, .hljs-bullet, .hljs-addition { @apply !text-accent-lime; }
+  .hljs-keyword, .hljs-selector-tag, .hljs-section { @apply !text-indigo-400; }
+  .hljs-title, .hljs-title.function_ { @apply !text-sky-400; }
+  
+  /* Mermaid diagram styles */
+  .language-mermaid > svg {
+    display: block;
+    margin: auto;
+    background: transparent !important;
+  }
+  .dark .language-mermaid > svg text { fill: #d1d5db !important; }
+  .dark .language-mermaid > svg .edge-text { fill: #d1d5db !important; }
+  .dark .language-mermaid > svg .label { color: #d1d5db !important; }
+
+  .glow-cyan {
+    box-shadow: 0 0 2px #00FFFF, 0 0 5px #00FFFF, 0 0 8px #00FFFF;
+  }
+  .glow-magenta {
+     box-shadow: 0 0 2px #FF00FF, 0 0 5px #FF00FF, 0 0 8px #FF00FF;
+  }
+  .animated-grid {
+    background-image:
+      linear-gradient(to right, rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    animation: pan-grid 20s linear infinite;
+    will-change: background-position;
+  }
+  /* Custom Slider */
+  input[type=range].custom-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: #334155; /* slate-700 */
+      border-radius: 2px;
+      outline: none;
+      transition: opacity .2s;
+  }
+  input[type=range].custom-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #00FFFF; /* accent-cyan */
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00FFFF;
+  }
+  input[type=range].custom-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: #00FFFF;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 10px #00FFFF;
+  }
+</style>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-space-blue-900 text-gray-200 animated-grid">
+    <div id="root"></div>
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[100] space-y-3"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script type="module" src="/index.tsx"></script>
+    <script type="module">
+      import mermaid from 'mermaid';
+      mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+      // Expose a global function to be called from React after rendering
+      window.renderMermaid = () => {
+        try {
+            const nodes = document.querySelectorAll('.language-mermaid');
+            if (nodes.length) {
+              mermaid.run({ nodes });
+            }
+        } catch (e) {
+            console.error("Mermaid render error:", e);
+        }
+      };
+    </script>
+  </body>
+</html>
